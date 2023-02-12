@@ -43,7 +43,9 @@ function getChangedPackages(
   )
   const parsedOutput: Partial<TurboOutput> = JSON.parse(json)
 
-  return parsedOutput.packages ?? []
+  const packageNames = parsedOutput.packages ?? []
+
+  return packageNames.filter((name) => name !== '//')
 }
 
 function run() {

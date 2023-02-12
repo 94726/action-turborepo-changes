@@ -36,8 +36,12 @@ jobs:
           from: HEAD^1
           working-directory: test-turborepo
 
+      - name: Log Outputs
+        run: |
+          echo packages: "${{ steps.turborepoChanges.outputs.packages }}"
+          echo package_names: "${{ steps.turborepoChanges.outputs.package_names }}"
+
+
       - name: Validate Outputs
         run: |
-          echo packages: "${{ fromJson(steps.turborepoChanges.outputs.packages) }}"
-          echo package_names: "${{ fromJson(steps.turborepoChanges.outputs.package_names) }}"
           [[ "${{ fromJson(steps.turborepoChanges.outputs.package_names) }}" && "${{ fromJson(steps.turborepoChanges.outputs.packages) }}" ]] && exit 0 || exit 1
