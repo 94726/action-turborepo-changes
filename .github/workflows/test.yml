@@ -35,7 +35,7 @@ jobs:
         uses: ./
         with:
           from: HEAD^1
-          working-directory: text-turborepo
+          working-directory: test-turborepo
 
       # Validate that output is either true or false
       - name: Validate Action Output
