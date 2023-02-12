@@ -35,7 +35,7 @@ function getChangedPackages(
   } = options
 
   const json = execSync(
-    `pnpm turbo run ${pipeline} --filter="${workspace}...[${from}...${to}]" --dry-run=json`,
+    `npx turbo run ${pipeline} --filter="${workspace}...[${from}...${to}]" --dry-run=json`,
     {
       cwd: join(process.cwd(), workingDirectory),
       encoding: 'utf-8',

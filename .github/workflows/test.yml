@@ -21,15 +21,14 @@ jobs:
       - run: |
           pnpm run all
 
-  test: # make sure the action works on a clean machine without building
+  test:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0 # Required to fetch range
+          fetch-depth: 0
 
-      # Run the action on the yarn-workspaces example
       - name: Test Action
         id: turborepoChanges
         uses: ./
@@ -37,8 +36,7 @@ jobs:
           from: HEAD^1
           working-directory: test-turborepo
 
-      # Validate that output is either true or false
-      - name: Validate Action Output
+      - name: Validate Outputs
         run: |
           echo packages: "${{ fromJson(steps.turborepoChanges.outputs.packages) }}"
           echo package_names: "${{ fromJson(steps.turborepoChanges.outputs.package_names) }}"
