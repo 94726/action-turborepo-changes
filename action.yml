@@ -1,5 +1,5 @@
-name: 'turborepo changed'
-description: ''
+name: 'Turborepo Changes'
+description: 'Action to get a list of changed workspaces in a Turborepo'
 author: 'Maik Kowol<https://github.com/94726>'
 branding:
   icon: git-branch
