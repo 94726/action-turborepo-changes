@@ -1,18 +1,64 @@
-import * as core from '@actions/core'
-import {wait} from './wait'
+import { execSync } from 'child_process'
+import { join } from 'path'
+import { getInput, debug, setFailed, setOutput } from '@actions/core'
 
-async function run(): Promise<void> {
+interface TurboOutput {
+  packages: string[]
+}
+
+interface GetChangedPackagesOptions {
+  pipeline: string
+  workingDirectory: string
+}
+
+function getChangedPackages(
+  from = 'HEAD^1',
+  to = '',
+  options: Partial<GetChangedPackagesOptions> = {}
+) {
+  const { pipeline = 'build', workingDirectory = './' } = options
+
+  const json = execSync(
+    `pnpm turbo run ${pipeline} --filter="...[${from}...${to}]" --dry-run=json`,
+    {
+      cwd: join(process.cwd(), workingDirectory),
+      encoding: 'utf-8',
+    }
+  )
+  const parsedOutput: Partial<TurboOutput> = JSON.parse(json)
+
+  return parsedOutput.packages ?? []
+}
+
+function run() {
   try {
-    const ms: string = core.getInput('milliseconds')
-    core.debug(`Waiting ${ms} milliseconds ...`) // debug is only output if you set the secret `ACTIONS_STEP_DEBUG` to true
+    const from = getInput('from')
+    const to = getInput('to')
+    const pipeline = getInput('pipeline')
+    const workingDirectory = getInput('working-directory')
 
-    core.debug(new Date().toTimeString())
-    await wait(parseInt(ms, 10))
-    core.debug(new Date().toTimeString())
+    debug(
+      `Finding changes with inputs: ${JSON.stringify({
+        from,
+        to,
+        pipeline,
+        workingDirectory,
+      })}`
+    )
+    const changedWorkspaces = getChangedPackages(from, to, {
+      pipeline,
+      workingDirectory,
+    })
 
-    core.setOutput('time', new Date().toTimeString())
+    debug(`Changed packages: ${changedWorkspaces}`)
+
+    setOutput('changed', changedWorkspaces)
   } catch (error) {
-    if (error instanceof Error) core.setFailed(error.message)
+    if (error instanceof Error || typeof error === 'string') {
+      setFailed(error)
+    } else {
+      setFailed('Unknown error occured.')
+    }
   }
 }
 

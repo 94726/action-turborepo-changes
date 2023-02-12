@@ -1,11 +1,29 @@
-name: 'Your name here'
-description: 'Provide a description here'
-author: 'Your name or organization here'
+name: 'turborepo changed'
+description: ''
+author: 'Maik Kowol<https://github.com/94726>'
+branding:
+  icon: git-branch
+  color: purple
 inputs:
-  milliseconds: # change this
-    required: true
-    description: 'input description here'
-    default: 'default value if applicable'
+  from:
+    required: false
+    description: 'Start of the commit range (commit hash or branch).'
+    default: 'HEAD^1'
+  to:
+    required: false
+    description: 'End of the commit range (commit hash or branch). Defaults to the latest availabe commit in the current branch.'
+  working-directory:
+    required: false
+    description: 'Path to the root of the Turborepo.'
+    default: './'
+  pipeline:
+    required: false
+    description: 'Turborepo pipeline to use.'
+    default: 'build'
+outputs:
+  changed:
+    description: 'Array containing changed workspaces'
+
 runs:
   using: 'node16'
   main: 'dist/index.js'
