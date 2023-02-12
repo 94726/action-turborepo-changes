@@ -19,11 +19,26 @@ jobs:
           pnpm install
       - run: |
           pnpm run all
-          
-  # test: # make sure the action works on a clean machine without building
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v2
-  #     - uses: ./
-  #       with:
-  #         milliseconds: 1000
+
+  test: # make sure the action works on a clean machine without building
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # Required to fetch range
+
+      # Run the action on the yarn-workspaces example
+      - name: Test Action
+        id: turborepoChanges
+        uses: ./
+        with:
+          from: HEAD^1
+          working-directory: text-turborepo
+
+      # Validate that output is either true or false
+      - name: Validate Action Output
+        run: |
+          echo packages: "${{ fromJson(steps.turborepoChanges.outputs.packages)""
+          echo package_names: "${{ fromJson(steps.turborepoChanges.outputs.package_names)""
+          [[ "${{ fromJson(steps.turborepoChanges.outputs.package_names) }}" && "${{ fromJson(steps.turborepoChanges.outputs.packages)"" ]] && exit 0 || exit 1

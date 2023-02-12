@@ -1,6 +1,7 @@
 import { execSync } from 'child_process'
 import { join } from 'path'
 import { getInput, debug, setFailed, setOutput } from '@actions/core'
+import { getPackagesSync } from '@manypkg/get-packages'
 
 interface TurboOutput {
   packages: string[]
@@ -8,7 +9,18 @@ interface TurboOutput {
 
 interface GetChangedPackagesOptions {
   pipeline: string
+  workspace: string
   workingDirectory: string
+}
+
+function getPackageMap(workingDirectory = './') {
+  const { packages } = getPackagesSync(workingDirectory)
+
+  const packageMap: Record<string, string> = {}
+  for (const pkg of packages.values()) {
+    packageMap[pkg.packageJson.name] = pkg.relativeDir
+  }
+  return packageMap
 }
 
 function getChangedPackages(
@@ -16,10 +28,14 @@ function getChangedPackages(
   to = '',
   options: Partial<GetChangedPackagesOptions> = {}
 ) {
-  const { pipeline = 'build', workingDirectory = './' } = options
+  const {
+    pipeline = 'build',
+    workspace = '',
+    workingDirectory = './',
+  } = options
 
   const json = execSync(
-    `pnpm turbo run ${pipeline} --filter="...[${from}...${to}]" --dry-run=json`,
+    `pnpm turbo run ${pipeline} --filter="${workspace}...[${from}...${to}]" --dry-run=json`,
     {
       cwd: join(process.cwd(), workingDirectory),
       encoding: 'utf-8',
@@ -35,24 +51,38 @@ function run() {
     const from = getInput('from')
     const to = getInput('to')
     const pipeline = getInput('pipeline')
+    const workspace = getInput('workspace')
     const workingDirectory = getInput('working-directory')
 
+    const packageMap = getPackageMap(workingDirectory)
+    debug(`Total packages in monorepo ${JSON.stringify(packageMap)}`)
+
     debug(
-      `Finding changes with inputs: ${JSON.stringify({
+      `Finding changed packages using inputs: ${JSON.stringify({
         from,
         to,
         pipeline,
+        workspace,
         workingDirectory,
       })}`
     )
-    const changedWorkspaces = getChangedPackages(from, to, {
+    const changedPackagesNames = getChangedPackages(from, to, {
       pipeline,
+      workspace,
       workingDirectory,
     })
 
-    debug(`Changed packages: ${changedWorkspaces}`)
+    const changedPackages = changedPackagesNames.map((packageName) => {
+      return {
+        name: packageName,
+        path: packageMap[packageName],
+      }
+    })
 
-    setOutput('changed', changedWorkspaces)
+    debug(`Changed packages: ${changedPackagesNames}`)
+
+    setOutput('package_names', changedPackagesNames)
+    setOutput('packages', changedPackages)
   } catch (error) {
     if (error instanceof Error || typeof error === 'string') {
       setFailed(error)

@@ -1,0 +1,11 @@
+{
+  "name": "web",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "echo building web"
+  },
+  "dependencies": {
+    "components": "workspace:*"
+  }
+}
