@@ -22480,7 +22480,8 @@ function getChangedPackages(from = 'HEAD^1', to = '', options = {}) {
         encoding: 'utf-8',
     });
     const parsedOutput = JSON.parse(json);
-    return (_a = parsedOutput.packages) !== null && _a !== void 0 ? _a : [];
+    const packageNames = (_a = parsedOutput.packages) !== null && _a !== void 0 ? _a : [];
+    return packageNames.filter((name) => name !== '//');
 }
 function run() {
     try {
