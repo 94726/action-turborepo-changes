@@ -23,7 +23,8 @@
   "author": "Maik Kowol<https://github.com/94726>",
   "license": "MIT",
   "dependencies": {
-    "@actions/core": "^1.10.0"
+    "@actions/core": "^1.10.0",
+    "@manypkg/get-packages": "^2.1.0"
   },
   "devDependencies": {
     "@types/node": "^18.13.0",

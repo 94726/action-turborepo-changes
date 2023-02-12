@@ -16,13 +16,19 @@ inputs:
     required: false
     description: 'Path to the root of the Turborepo.'
     default: './'
+  workspace:
+    required: false
+    description: 'Turborepo workspace filter. See https://turbo.build/repo/docs/core-concepts/monorepos/filtering'
+    default: ''
   pipeline:
     required: false
     description: 'Turborepo pipeline to use.'
     default: 'build'
 outputs:
-  changed:
-    description: 'Array containing changed workspaces'
+  package_names:
+    description: 'Array containing names of changed packages'
+  packages:
+    description: "Array containing {name: PACKAGE_NAME, path: RELATIVE_PACKAGE_PATH} for every changed package"
 
 runs:
   using: 'node16'

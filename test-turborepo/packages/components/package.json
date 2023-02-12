@@ -1,0 +1,8 @@
+{
+  "name": "components",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "echo building components"
+  }
+}

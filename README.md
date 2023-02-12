@@ -30,8 +30,7 @@ jobs:
         with:
           from: HEAD^1 # Changes since previous commit (this is the default)
 
-      # Do something more meaningful here, like push to NPM, do heavy computing, etc.
       - name: Validate Action Output
-        if: contains(fromJson(steps.turborepoChanges.outputs.changed), 'components') # Check output if it changed or not (returns a boolean)
+        if: contains(fromJson(steps.turborepoChanges.outputs.package_names), 'components') # Check if components package has changed
         run: echo 'package "components" has changed'
 ```

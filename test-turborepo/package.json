@@ -1,0 +1,16 @@
+{
+  "name": "test-turborepo",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "build": "turbo run build"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "turbo": "latest"
+  },
+  "packageManager": "pnpm@7.9.5",
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
