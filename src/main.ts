@@ -1,7 +1,7 @@
 import { execSync } from 'child_process'
 import { join } from 'path'
 import { getInput, debug, setFailed, setOutput } from '@actions/core'
-import { getPackagesSync } from '@manypkg/get-packages'
+import { getPackagesSync, Package } from '@manypkg/get-packages'
 
 interface TurboOutput {
   packages: string[]
@@ -13,12 +13,17 @@ interface GetChangedPackagesOptions {
   workingDirectory: string
 }
 
+type ActionOutput = {
+  name: string
+  path: string
+}[]
+
 function getPackageMap(workingDirectory = './') {
   const { packages } = getPackagesSync(workingDirectory)
 
-  const packageMap: Record<string, string> = {}
-  for (const pkg of packages.values()) {
-    packageMap[pkg.packageJson.name] = pkg.relativeDir
+  const packageMap: Record<string, Package> = {}
+  for (const pkg of packages) {
+    packageMap[pkg.packageJson.name] = pkg
   }
   return packageMap
 }
@@ -55,6 +60,7 @@ function run() {
     const pipeline = getInput('pipeline')
     const workspace = getInput('workspace')
     const workingDirectory = getInput('working-directory')
+    const excludePrivatePackages = !!getInput('exclude-private-packages')
 
     const packageMap = getPackageMap(workingDirectory)
     debug(`Total packages in monorepo ${JSON.stringify(packageMap)}`)
@@ -66,6 +72,7 @@ function run() {
         pipeline,
         workspace,
         workingDirectory,
+        excludePrivatePackages,
       })}`
     )
     const changedPackagesNames = getChangedPackages(from, to, {
@@ -74,12 +81,16 @@ function run() {
       workingDirectory,
     })
 
-    const changedPackages = changedPackagesNames.map((packageName) => {
-      return {
+    const changedPackages: ActionOutput = []
+    for (const packageName of changedPackagesNames) {
+      if (excludePrivatePackages && packageMap[packageName].packageJson.private)
+        continue
+
+      changedPackages.push({
         name: packageName,
-        path: packageMap[packageName],
-      }
-    })
+        path: packageMap[packageName].relativeDir,
+      })
+    }
 
     debug(`Changed packages: ${changedPackagesNames}`)
 

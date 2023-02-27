@@ -24,11 +24,16 @@ inputs:
     required: false
     description: 'Turborepo pipeline to use.'
     default: 'build'
+  exclude-private-packages:
+    required: false
+    description: 'Excludes workspaces with private: true'
+    default: ''
+
 outputs:
   package_names:
     description: 'Array containing names of changed packages'
   packages:
-    description: "Array containing {name: PACKAGE_NAME, path: RELATIVE_PACKAGE_PATH} for every changed package"
+    description: 'Array containing {name: PACKAGE_NAME, path: RELATIVE_PACKAGE_PATH} for every changed package'
 
 runs:
   using: 'node16'

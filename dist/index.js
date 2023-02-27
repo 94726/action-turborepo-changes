@@ -22467,8 +22467,8 @@ const get_packages_1 = __nccwpck_require__(7298);
 function getPackageMap(workingDirectory = './') {
     const { packages } = (0, get_packages_1.getPackagesSync)(workingDirectory);
     const packageMap = {};
-    for (const pkg of packages.values()) {
-        packageMap[pkg.packageJson.name] = pkg.relativeDir;
+    for (const pkg of packages) {
+        packageMap[pkg.packageJson.name] = pkg;
     }
     return packageMap;
 }
@@ -22490,6 +22490,7 @@ function run() {
         const pipeline = (0, core_1.getInput)('pipeline');
         const workspace = (0, core_1.getInput)('workspace');
         const workingDirectory = (0, core_1.getInput)('working-directory');
+        const excludePrivatePackages = !!(0, core_1.getInput)('exclude-private-packages');
         const packageMap = getPackageMap(workingDirectory);
         (0, core_1.debug)(`Total packages in monorepo ${JSON.stringify(packageMap)}`);
         (0, core_1.debug)(`Finding changed packages using inputs: ${JSON.stringify({
@@ -22498,18 +22499,22 @@ function run() {
             pipeline,
             workspace,
             workingDirectory,
+            excludePrivatePackages,
         })}`);
         const changedPackagesNames = getChangedPackages(from, to, {
             pipeline,
             workspace,
             workingDirectory,
         });
-        const changedPackages = changedPackagesNames.map((packageName) => {
-            return {
+        const changedPackages = [];
+        for (const packageName of changedPackagesNames) {
+            if (excludePrivatePackages && packageMap[packageName].packageJson.private)
+                continue;
+            changedPackages.push({
                 name: packageName,
-                path: packageMap[packageName],
-            };
-        });
+                path: packageMap[packageName].relativeDir,
+            });
+        }
         (0, core_1.debug)(`Changed packages: ${changedPackagesNames}`);
         (0, core_1.setOutput)('package_names', changedPackagesNames);
         (0, core_1.setOutput)('packages', changedPackages);
