@@ -39,8 +39,10 @@ function getChangedPackages(
     workingDirectory = './',
   } = options
 
+  const fromTo = to ? `${from}...${to}` : from
+
   const json = execSync(
-    `npx turbo run ${pipeline} --filter="${workspace}...[${from}...${to}]" --dry-run=json`,
+    `npx turbo run ${pipeline} --filter="${workspace}...[${fromTo}]" --dry-run=json`,
     {
       cwd: join(process.cwd(), workingDirectory),
       encoding: 'utf-8',
@@ -97,7 +99,9 @@ function run() {
     setOutput('package_names', changedPackagesNames)
     setOutput('packages', changedPackages)
   } catch (error) {
-    if (error instanceof Error || typeof error === 'string') {
+    if (error instanceof Error) {
+      setFailed({name: error.name, message: error.message, stack: error.stack})
+    } else if (typeof error === 'string') {
       setFailed(error)
     } else {
       setFailed('Unknown error occured.')
